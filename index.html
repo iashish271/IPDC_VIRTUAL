@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPDC-1 Virtual Q&A</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Home Screen */
+        .home-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .home-header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .home-header h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .home-header p {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .section-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .section-card h3 {
+            color: #667eea;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .section-card p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Question Screen */
+        .question-header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .question-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lecture-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .question-counter {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .option-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option-btn.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option-btn.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .feedback {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .feedback.correct {
+            border-left: 5px solid #28a745;
+        }
+
+        .feedback.incorrect {
+            border-left: 5px solid #dc3545;
+        }
+
+        .feedback-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .feedback.correct .feedback-header {
+            color: #28a745;
+        }
+
+        .feedback.incorrect .feedback-header {
+            color: #dc3545;
+        }
+
+        .feedback-details {
+            margin-bottom: 15px;
+        }
+
+        .feedback-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .explanation {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .explanation h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .explanation p {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+        }
+
+        /* Results Screen */
+        .results-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .results-card h2 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat-box h4 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-box.correct .value {
+            color: #28a745;
+        }
+
+        .stat-box.wrong .value {
+            color: #dc3545;
+        }
+
+        .section-scores {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .section-scores h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .section-score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section-score-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Review Screen */
+        .review-header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .review-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .review-item:hover {
+            transform: translateX(5px);
+        }
+
+        .review-item.correct {
+            border-left: 5px solid #28a745;
+        }
+
+        .review-item.incorrect {
+            border-left: 5px solid #dc3545;
+        }
+
+        .review-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .review-item-number {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .review-item-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .review-item.correct .review-item-status {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .review-item.incorrect .review-item-status {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .review-item-question {
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .review-item-answers {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #667eea;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .modal-option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .home-header h1 {
+                font-size: 2rem;
+            }
+
+            .section-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .score-display {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen active">
+            <div class="home-header">
+                <h1>IPDC-1</h1>
+                <h2>Virtual Q&A</h2>
+                <p>Practice Lectures 1–15</p>
+            </div>
+
+            <div class="section-cards">
+                <div class="section-card" onclick="startSection('A')">
+                    <h3>SECTION A</h3>
+                    <p>True / False</p>
+                    <p>50 Questions</p>
+                </div>
+                <div class="section-card" onclick="startSection('B')">
+                    <h3>SECTION B</h3>
+                    <p>MCQ</p>
+                    <p>50 Questions</p>
+                </div>
+                <div class="section-card" onclick="startSection('C')">
+                    <h3>SECTION C</h3>
+                    <p>Scenario Based</p>
+                    <p>30 Questions</p>
+                </div>
+            </div>
+
+            <div class="button-grid">
+                <button class="btn btn-primary" onclick="startFullTest()">Start Full Test</button>
+                <button class="btn btn-secondary" onclick="showLectureModal()">Practice by Lecture</button>
+                <button class="btn btn-secondary" onclick="showRandomModal()">Random Practice</button>
+                <button class="btn btn-secondary" onclick="showReview()">Review Previous</button>
+                <button class="btn btn-secondary" onclick="resetProgress()">Reset Progress</button>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div id="question-screen" class="screen">
+            <div class="question-header">
+                <div class="question-header-top">
+                    <span class="lecture-badge" id="lecture-badge">Lecture 1</span>
+                    <span class="question-counter" id="question-counter">Question 1 / 50</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <p class="question-text" id="question-text">Question text here</p>
+                <div class="options-grid" id="options-grid"></div>
+            </div>
+
+            <div class="feedback" id="feedback">
+                <div class="feedback-header" id="feedback-header"></div>
+                <div class="feedback-details" id="feedback-details"></div>
+                <div class="explanation" id="explanation"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-check" id="check-btn" onclick="checkAnswer()">CHECK ANSWER</button>
+                <button class="btn btn-next" id="next-btn" onclick="nextQuestion()" style="display: none;">NEXT QUESTION →</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <div class="results-card">
+                <h2>Final Score</h2>
+                <div class="score-display" id="final-score">0%</div>
+                <p class="score-label" id="score-breakdown">0 Correct • 0 Wrong • 0 Unanswered</p>
+
+                <div class="stats-grid">
+                    <div class="stat-box correct">
+                        <h4>Correct</h4>
+                        <div class="value" id="correct-count">0</div>
+                    </div>
+                    <div class="stat-box wrong">
+                        <h4>Wrong</h4>
+                        <div class="value" id="wrong-count">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Unanswered</h4>
+                        <div class="value" id="unanswered-count">0</div>
+                    </div>
+                </div>
+
+                <div class="section-scores">
+                    <h3>Section Scores</h3>
+                    <div class="section-score-item">
+                        <span>Section A (True/False)</span>
+                        <span id="section-a-score">0/0</span>
+                    </div>
+                    <div class="section-score-item">
+                        <span>Section B (MCQ)</span>
+                        <span id="section-b-score">0/0</span>
+                    </div>
+                    <div class="section-score-item">
+                        <span>Section C (Scenario)</span>
+                        <span id="section-c-score">0/0</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons" style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="showReview()">Review Answers</button>
+                    <button class="btn btn-secondary" onclick="retryIncorrect()">Retry Incorrect</button>
+                    <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Screen -->
+        <div id="review-screen" class="screen">
+            <div class="review-header">
+                <h2>Review Answers</h2>
+                <button class="btn btn-secondary" onclick="goHome()">Back to Home</button>
+            </div>
+            <div class="review-list" id="review-list"></div>
+        </div>
+    </div>
+
+    <!-- Lecture Modal -->
+    <div class="modal" id="lecture-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Lecture</h3>
+                <button class="modal-close" onclick="closeModal('lecture-modal')">&times;</button>
+            </div>
+            <div class="modal-options" id="lecture-options"></div>
+        </div>
+    </div>
+
+    <!-- Random Modal -->
+    <div class="modal" id="random-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Random Practice</h3>
+                <button class="modal-close" onclick="closeModal('random-modal')">&times;</button>
+            </div>
+            <div class="modal-options">
+                <div class="modal-option" onclick="startRandom(10)">Random 10</div>
+                <div class="modal-option" onclick="startRandom(20)">Random 20</div>
+                <div class="modal-option" onclick="startRandom(30)">Random 30</div>
+                <div class="modal-option" onclick="startRandom(50)">Random 50</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All 130 Questions from IPDC Question Bank
+        const questions = [
+            // SECTION A - True/False (Q1-Q50)
+            {
+                id: 1,
+                section: "A",
+                lecture: 1,
+                type: "true_false",
+                question: "A single thought has the potential to change the entire world.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "A single powerful thought can indeed change the world as it can inspire actions and innovations."
+            },
+            {
+                id: 2,
+                section: "A",
+                lecture: 1,
+                type: "true_false",
+                question: "My personal growth depends only on my surroundings.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Personal growth depends on our own efforts, choices, and mindset, not just surroundings."
+            },
+            {
+                id: 3,
+                section: "A",
+                lecture: 1,
+                type: "true_false",
+                question: "'Live every day as your last'. This thought allows us to prioritize our life and achieve those things that are more important sooner.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "This perspective helps us focus on what truly matters and take action on important goals."
+            },
+            {
+                id: 4,
+                section: "A",
+                lecture: 2,
+                type: "true_false",
+                question: "According to Robin Sharma, it only takes 11 days to develop a new habit.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Robin Sharma mentions it takes 21 days to develop a new habit, not 11 days."
+            },
+            {
+                id: 5,
+                section: "A",
+                lecture: 2,
+                type: "true_false",
+                question: "Your life will expand or contract in direct relationship to your good and bad habits.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Habits directly impact the quality and direction of our lives."
+            },
+            {
+                id: 6,
+                section: "A",
+                lecture: 2,
+                type: "true_false",
+                question: "The difference between who you are and who you want to be is what you believe. And that which you believe consistently is called a Habit.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Our consistent beliefs become habits, and habits shape who we become."
+            },
+            {
+                id: 7,
+                section: "A",
+                lecture: 3,
+                type: "true_false",
+                question: "Though a Legend may not be present physically, their value-based life can serve as an inspiration for others.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Legends inspire others through their values and life examples, even after they're gone."
+            },
+            {
+                id: 8,
+                section: "A",
+                lecture: 3,
+                type: "true_false",
+                question: "If we face difficult circumstances, then we should panic and get upset.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "We should remain calm and think clearly during difficult circumstances, not panic."
+            },
+            {
+                id: 9,
+                section: "A",
+                lecture: 3,
+                type: "true_false",
+                question: "In the face of difficult circumstances, we should try to remain steady and think clearly.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Remaining steady and thinking clearly helps us handle difficult situations effectively."
+            },
+            {
+                id: 10,
+                section: "A",
+                lecture: 4,
+                type: "true_false",
+                question: "There is no difference between listening and hearing.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Hearing is physical, while listening involves understanding and engagement."
+            },
+            {
+                id: 11,
+                section: "A",
+                lecture: 4,
+                type: "true_false",
+                question: "A good listener will be able to understand how the speaker is feeling.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Active listening involves understanding emotions, not just words."
+            },
+            {
+                id: 12,
+                section: "A",
+                lecture: 4,
+                type: "true_false",
+                question: "A good listener will have a conversation while also texting on their phone.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "A good listener gives full attention without distractions like texting."
+            },
+            {
+                id: 13,
+                section: "A",
+                lecture: 5,
+                type: "true_false",
+                question: "In the face of failure, we should try to see the positive angle.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Finding the positive in failure helps us learn and grow."
+            },
+            {
+                id: 14,
+                section: "A",
+                lecture: 6,
+                type: "true_false",
+                question: "Focus on what you can control and do not waste energy on things that you cannot control.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Focusing on what we can control is more productive than worrying about uncontrollable things."
+            },
+            {
+                id: 15,
+                section: "A",
+                lecture: 6,
+                type: "true_false",
+                question: "We should spend most of our time in the circle of concern.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "We should focus on the circle of influence, not the circle of concern."
+            },
+            {
+                id: 16,
+                section: "A",
+                lecture: 6,
+                type: "true_false",
+                question: "Within the circle of influence, there are things that you can control.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "The circle of influence contains things we can control and affect."
+            },
+            {
+                id: 17,
+                section: "A",
+                lecture: 7,
+                type: "true_false",
+                question: "The Vedic text, Baudhāyana Shulba Sutra, contains surgical techniques like the heart bypass surgery.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Baudhāyana Shulba Sutra is about mathematics and geometry, not surgical techniques."
+            },
+            {
+                id: 18,
+                section: "A",
+                lecture: 7,
+                type: "true_false",
+                question: "Āryabhata rishi's estimation of Pi was near the actual value of π (Pi).",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Āryabhata calculated Pi accurately as 3.1416, very close to the actual value."
+            },
+            {
+                id: 19,
+                section: "A",
+                lecture: 7,
+                type: "true_false",
+                question: "The rishis of India have contributed greatly to the fields of Mathematics, Astronomy, and Physics.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Indian rishis made significant contributions to these scientific fields."
+            },
+            {
+                id: 20,
+                section: "A",
+                lecture: 7,
+                type: "true_false",
+                question: "Āryabhata Rishi mainly contributed to the field of Biology.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Āryabhata contributed to Mathematics and Astronomy, not Biology."
+            },
+            {
+                id: 21,
+                section: "A",
+                lecture: 7,
+                type: "true_false",
+                question: "Bakhshali manuscript was written by Isaac Newton.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Bakhshali manuscript is an ancient Indian mathematical text, not written by Newton."
+            },
+            {
+                id: 22,
+                section: "A",
+                lecture: 8,
+                type: "true_false",
+                question: "Sushruta is famous for his work on astronomy and mathematics.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Sushruta is famous for medicine and surgery, not astronomy and mathematics."
+            },
+            {
+                id: 23,
+                section: "A",
+                lecture: 8,
+                type: "true_false",
+                question: "Vijay Bhatkar became the chancellor of Nalanda University.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Vijay Bhatkar indeed became the chancellor of Nalanda University."
+            },
+            {
+                id: 24,
+                section: "A",
+                lecture: 8,
+                type: "true_false",
+                question: "The origin of Takshashilā goes back at least to 1000 BCE",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Takshashilā University dates back to at least 1000 BCE."
+            },
+            {
+                id: 25,
+                section: "A",
+                lecture: 8,
+                type: "true_false",
+                question: "Julius Caesar learnt Sanskrit so he could study the Bhagavad Gita and ancient Indian texts.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "There is no historical evidence that Julius Caesar learnt Sanskrit."
+            },
+            {
+                id: 26,
+                section: "A",
+                lecture: 8,
+                type: "true_false",
+                question: "It is our duty to share India's glorious past.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Sharing India's rich heritage and history is indeed our duty."
+            },
+            {
+                id: 27,
+                section: "A",
+                lecture: 9,
+                type: "true_false",
+                question: "We should not allow any difficulties that arise in our lives to stop us from pursuing our dream.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "We should persist despite difficulties and not let them stop our dreams."
+            },
+            {
+                id: 28,
+                section: "A",
+                lecture: 9,
+                type: "true_false",
+                question: "Dr Abdul Kalam lived an extraordinary life but only during his time as the President.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Dr Kalam lived an extraordinary life throughout, not just as President."
+            },
+            {
+                id: 29,
+                section: "A",
+                lecture: 9,
+                type: "true_false",
+                question: "As a young adult, it is important to dream, to visualize a goal, and then contemplate on how to achieve it.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Dreaming, visualizing goals, and planning are important for success."
+            },
+            {
+                id: 30,
+                section: "A",
+                lecture: 9,
+                type: "true_false",
+                question: "Dr Abdul Kalam's academic intelligence was the only reason for his success.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "His success was due to hard work, values, and perseverance, not just academic intelligence."
+            },
+            {
+                id: 31,
+                section: "A",
+                lecture: 10,
+                type: "true_false",
+                question: "Networking involves building and maintaining relationships over time.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Networking is about building and nurturing relationships."
+            },
+            {
+                id: 32,
+                section: "A",
+                lecture: 10,
+                type: "true_false",
+                question: "Staying in contact is key when building your network.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Regular contact is essential for maintaining a strong network."
+            },
+            {
+                id: 33,
+                section: "A",
+                lecture: 10,
+                type: "true_false",
+                question: "Networking is the process of calculating the net profit.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Networking is about relationships, not financial calculations."
+            },
+            {
+                id: 34,
+                section: "A",
+                lecture: 11,
+                type: "true_false",
+                question: "Principles of project management make it harder to plan in advance.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Project management principles make planning easier and more effective."
+            },
+            {
+                id: 35,
+                section: "A",
+                lecture: 11,
+                type: "true_false",
+                question: "Time efficiency means to effectively complete the project within the deadline.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Time efficiency is about completing projects within deadlines."
+            },
+            {
+                id: 36,
+                section: "A",
+                lecture: 11,
+                type: "true_false",
+                question: "Project Management should be done after completing the Project.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Project management should be done throughout the project, not after completion."
+            },
+            {
+                id: 37,
+                section: "A",
+                lecture: 11,
+                type: "true_false",
+                question: "Akshardham -Delhi was built in 10 years.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Akshardham Delhi was completed in about 5 years, not 10."
+            },
+            {
+                id: 38,
+                section: "A",
+                lecture: 12,
+                type: "true_false",
+                question: "Social media can change our perception of the world and ourselves, but not always for the better.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Social media can negatively impact self-perception and worldview."
+            },
+            {
+                id: 39,
+                section: "A",
+                lecture: 12,
+                type: "true_false",
+                question: "Social media has been designed to keep users engaged on their device for only a brief amount of time.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Social media is designed to keep users engaged for long periods, not brief time."
+            },
+            {
+                id: 40,
+                section: "A",
+                lecture: 12,
+                type: "true_false",
+                question: "One of the ways social media developers have strategized to keep users engaged for a long time is by removing stopping cues.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Removing stopping cues is a strategy to keep users scrolling longer."
+            },
+            {
+                id: 41,
+                section: "A",
+                lecture: 12,
+                type: "true_false",
+                question: "If technology is used without discretion then it is a blessing. But with discretion, it is a curse.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Technology with discretion is a blessing, without discretion it's a curse."
+            },
+            {
+                id: 42,
+                section: "A",
+                lecture: 13,
+                type: "true_false",
+                question: "Faith is an essential part of our lives",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Faith gives strength and is essential for mental and emotional well-being."
+            },
+            {
+                id: 43,
+                section: "A",
+                lecture: 13,
+                type: "true_false",
+                question: "Keeping faith in ourselves can give us strength",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Self-faith provides inner strength and confidence."
+            },
+            {
+                id: 44,
+                section: "A",
+                lecture: 13,
+                type: "true_false",
+                question: "Relying only on ourselves is the only way of achieving our dreams",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "We need faith in ourselves, others, and God, not just self-reliance."
+            },
+            {
+                id: 45,
+                section: "A",
+                lecture: 13,
+                type: "true_false",
+                question: "To run an organisation, it must have faith in its people",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Organizations succeed when they have faith in their people."
+            },
+            {
+                id: 46,
+                section: "A",
+                lecture: 14,
+                type: "true_false",
+                question: "Excessive social media usage has been critically linked to loneliness and depression within youth.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Studies show excessive social media use correlates with loneliness and depression."
+            },
+            {
+                id: 47,
+                section: "A",
+                lecture: 14,
+                type: "true_false",
+                question: "Screen time generally has a positive effect on family bonding and relationships.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Excessive screen time often negatively impacts family relationships."
+            },
+            {
+                id: 48,
+                section: "A",
+                lecture: 14,
+                type: "true_false",
+                question: "Family and community culture can have a significant positive impact on one's health and wellbeing.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Strong family and community culture positively impacts health and wellbeing."
+            },
+            {
+                id: 49,
+                section: "A",
+                lecture: 15,
+                type: "true_false",
+                question: "Seva means to serve individuals with the expectation of praise and rewards.",
+                options: ["True", "False"],
+                answer: 1,
+                explanation: "Seva is selfless service without expectation of reward or praise."
+            },
+            {
+                id: 50,
+                section: "A",
+                lecture: 15,
+                type: "true_false",
+                question: "Seva can be beneficial to our health.",
+                options: ["True", "False"],
+                answer: 0,
+                explanation: "Selfless service (seva) has been shown to have mental and physical health benefits."
+            },
+
+            // SECTION B - MCQ (Q51-Q100)
+            {
+                id: 51,
+                section: "B",
+                lecture: 1,
+                type: "mcq",
+                question: "Which of these people had the following thought that led to their success – \"What happens if you divide 0 by 0?\"",
+                options: ["Srinivasa Ramanujan", "Isaac Newton", "Albert Einstein", "Abdul Kalam"],
+                answer: 0,
+                explanation: "Srinivasa Ramanujan was known for his mathematical curiosity including thinking about dividing zero by zero."
+            },
+            {
+                id: 52,
+                section: "B",
+                lecture: 1,
+                type: "mcq",
+                question: "Which of the following are NOT one of IPDC's four quotients?",
+                options: ["Intelligence Quotient", "Emotional Quotient", "Adaptability Quotient", "Physical Quotient"],
+                answer: 3,
+                explanation: "IPDC's four quotients are IQ, EQ, AQ, and SQ (Spiritual Quotient), not Physical Quotient."
+            },
+            {
+                id: 53,
+                section: "B",
+                lecture: 1,
+                type: "mcq",
+                question: "Which of these is NOT one of the 6 powerful thoughts?",
+                options: ["Whatever happens, happens for the best", "What am I grateful for?", "How can I get people to like me?", "Am I giving my 100%?"],
+                answer: 2,
+                explanation: "\"How can I get people to like me?\" is not one of the 6 powerful thoughts taught in IPDC."
+            },
+            {
+                id: 54,
+                section: "B",
+                lecture: 2,
+                type: "mcq",
+                question: "Change begins, simply, with _?",
+                options: ["Talent", "An action", "Effort", "A thought"],
+                answer: 3,
+                explanation: "Change begins with a thought, which then leads to action."
+            },
+            {
+                id: 55,
+                section: "B",
+                lecture: 2,
+                type: "mcq",
+                question: "To adapt to new circumstance, changes are essential. This is explained in the lecture using which example?",
+                options: ["Mahindra", "Ford", "Honda", "Toyota"],
+                answer: 1,
+                explanation: "The lecture uses Ford's example of adapting to market changes."
+            },
+            {
+                id: 56,
+                section: "B",
+                lecture: 2,
+                type: "mcq",
+                question: "Which of the following points is NOT one of the habits that Tom Corley, author of \"Change Your Habits, Change Your Life\" discussed in his study of 233 self-made millionaires over a period of 5 years?",
+                options: ["They get up early", "They sleep 4 hours or less", "They read a lot", "They make exercise a priority"],
+                answer: 1,
+                explanation: "Successful people don't sleep only 4 hours; they prioritize adequate sleep."
+            },
+            {
+                id: 57,
+                section: "B",
+                lecture: 2,
+                type: "mcq",
+                question: "How do habits form?",
+                options: ["Cue-> routine -> reward", "Practice -> perfect practice -> reward", "Learn -> practice -> success", "Learn -> patience -> success"],
+                answer: 0,
+                explanation: "Habits form through the cue-routine-reward loop."
+            },
+            {
+                id: 58,
+                section: "B",
+                lecture: 3,
+                type: "mcq",
+                question: "According to the IPDC workbook, Tendulkar and Tate are what type of people?",
+                options: ["Extraordinary", "Emotional", "Legendary", "Ordinary"],
+                answer: 2,
+                explanation: "Tendulkar and Tata are described as legendary figures."
+            },
+            {
+                id: 59,
+                section: "B",
+                lecture: 3,
+                type: "mcq",
+                question: "During the 1999 ICC World Cup, Sachin Tendulkar's passed away, at that time he _.",
+                options: ["Become emotionally unstable.", "Was unable to continue playing in the world cup.", "Refused to attend his father's final rites and continued to play cricket.", "Maintained balance of mind."],
+                answer: 3,
+                explanation: "Despite his father's death, Tendulkar maintained balance and continued playing."
+            },
+            {
+                id: 60,
+                section: "B",
+                lecture: 3,
+                type: "mcq",
+                question: "Complete the following quotation of Sachin Tendulkar, \"Don't stop __ your dreams, because dreams do come true.\"",
+                options: ["Chasing", "Forgetting", "Sharing", "Caring"],
+                answer: 0,
+                explanation: "The quote is \"Don't stop chasing your dreams, because dreams do come true.\""
+            },
+            {
+                id: 61,
+                section: "B",
+                lecture: 3,
+                type: "mcq",
+                question: "What did Tata do for the people of India?",
+                options: ["Tata created a free telephone service with unlimited data.", "Tata created an affordable car for every family.", "Tata created the largest hospital in Mumbai.", "Tata created a new submarine for the military."],
+                answer: 1,
+                explanation: "Tata created the Nano, an affordable car for Indian families."
+            },
+            {
+                id: 62,
+                section: "B",
+                lecture: 4,
+                type: "mcq",
+                question: "Which of the following is NOT a key factor of Active Listening?",
+                options: ["Listening with our ears", "Listening with our eyes and body", "Listening with our mind and heart", "Listening with our opinion"],
+                answer: 3,
+                explanation: "Active listening does not involve listening with opinion; it involves being open-minded."
+            },
+            {
+                id: 63,
+                section: "B",
+                lecture: 4,
+                type: "mcq",
+                question: "What are the proven ways to show the other person that you are completely engaged in the conversation?",
+                options: ["Summarizing the main points", "Asking appropriate questions", "a & b both", "None of the above"],
+                answer: 2,
+                explanation: "Both summarizing and asking questions show engagement in active listening."
+            },
+            {
+                id: 64,
+                section: "B",
+                lecture: 4,
+                type: "mcq",
+                question: "What should a person do while listening to someone?",
+                options: ["Think about what to do after the conversation", "Make it look like they are listening", "Brainstorm on homework", "Give full attention to the speaker"],
+                answer: 3,
+                explanation: "One should give full attention to the speaker while listening."
+            },
+            {
+                id: 65,
+                section: "B",
+                lecture: 4,
+                type: "mcq",
+                question: "Which of the following does NOT mean \"Listening with our eyes\"?",
+                options: ["Maintaining eye contact", "Listening while reading at a phone message", "Looking at the speaker's facial cues", "Concentrating on the speaker"],
+                answer: 1,
+                explanation: "Reading phone messages is not listening with eyes; it's a distraction."
+            },
+            {
+                id: 66,
+                section: "B",
+                lecture: 5,
+                type: "mcq",
+                question: "Which of the following methods should we NOT adopt during difficult challenges?",
+                options: ["Find a positive attitude", "Find someone to blame", "Find workable solutions", "Find assistance"],
+                answer: 1,
+                explanation: "Blaming others is not constructive during difficult challenges."
+            },
+            {
+                id: 67,
+                section: "B",
+                lecture: 5,
+                type: "mcq",
+                question: "Complete the following quote from the workbook: \"Life is 10% what happens to us and 90% _____\"",
+                options: ["What happens to others", "How we feel", "Having fun", "How we respond to it"],
+                answer: 3,
+                explanation: "Life is 10% what happens and 90% how we respond to it."
+            },
+            {
+                id: 68,
+                section: "B",
+                lecture: 6,
+                type: "mcq",
+                question: "According to the workbook, which of these does NOT lead us to failure?",
+                options: ["Self-doubts", "Fear of failure", "Finding support", "Making excuses"],
+                answer: 2,
+                explanation: "Finding support helps us succeed, not fail."
+            },
+            {
+                id: 69,
+                section: "B",
+                lecture: 6,
+                type: "mcq",
+                question: "In the book, '7 Habits of Highly Effective People', Stephen Covey says that we should stay in which one of these circles?",
+                options: ["Circle of influence", "Circle of miracles", "Circle of concern", "Circle of life"],
+                answer: 0,
+                explanation: "Covey advises focusing on the circle of influence, not circle of concern."
+            },
+            {
+                id: 70,
+                section: "B",
+                lecture: 6,
+                type: "mcq",
+                question: "Which famous failure is best known for later success in writing the international best-selling book series Harry Potter?",
+                options: ["John Rolling", "JK Rowling", "George Orwell", "JRR Tolkien"],
+                answer: 1,
+                explanation: "JK Rowling faced many rejections before Harry Potter became successful."
+            },
+            {
+                id: 71,
+                section: "B",
+                lecture: 6,
+                type: "mcq",
+                question: "Who was kicked out as the CEO of Apple at the age of 30?",
+                options: ["Steve Jobs", "Steven Covey", "Tim Cook", "Steve Wozniak"],
+                answer: 0,
+                explanation: "Steve Jobs was fired from Apple at age 30 but later returned."
+            },
+            {
+                id: 72,
+                section: "B",
+                lecture: 7,
+                type: "mcq",
+                question: "Which of the below scientist, calculated an accurate approximation for Pi(π)?",
+                options: ["Aryabhata", "Vikram", "Sushruta", "Vyasa"],
+                answer: 0,
+                explanation: "Aryabhata calculated Pi as 3.1416, very close to the actual value."
+            },
+            {
+                id: 73,
+                section: "B",
+                lecture: 7,
+                type: "mcq",
+                question: "\"We owe a lot to the Indians, who taught us how to count, without which no worthwhile scientific discovery could have been made.\" Who said this statement?",
+                options: ["Ernest Rutherford", "Guillaume Le Gentil", "Albert Einstein", "K. V. Sharma"],
+                answer: 2,
+                explanation: "Albert Einstein acknowledged India's contribution to mathematics."
+            },
+            {
+                id: 74,
+                section: "B",
+                lecture: 7,
+                type: "mcq",
+                question: "\"छादयतत शशी सं , शशशन महती च भ छाया \" This Sanskrit shloka is the scientific explanation of what theory?",
+                options: ["Earth's Gravity", "Solar and Lunar Eclipses", "Calculation of Pi", "Pythagorean theorem"],
+                answer: 1,
+                explanation: "This shloka explains the scientific theory behind solar and lunar eclipses."
+            },
+            {
+                id: 75,
+                section: "B",
+                lecture: 7,
+                type: "mcq",
+                question: "What research does Zero Project Foundation do?",
+                options: ["The development of motor engines with zero carbon emissions", "The effect of zero-tolerance laws", "The origins of the digit zero", "The benefits of meditation"],
+                answer: 2,
+                explanation: "Zero Project Foundation researches the origins of the digit zero from India."
+            },
+            {
+                id: 76,
+                section: "B",
+                lecture: 7,
+                type: "mcq",
+                question: "Which pair of titles from below best suits Aryabhata Rishi?",
+                options: ["Astronomer -Mathematician", "Physicist -Historian", "Physicist -Biologist", "Nuclear Scientist -Mathematician"],
+                answer: 0,
+                explanation: "Aryabhata was both an astronomer and mathematician."
+            },
+            {
+                id: 77,
+                section: "B",
+                lecture: 8,
+                type: "mcq",
+                question: "Which of the following western scientists did NOT read our Indian scriptures to seek ideas and inspiration.",
+                options: ["Erwin Schrodinger", "Werner Heisenberg", "Robert Hooke", "Niels Bohr"],
+                answer: 2,
+                explanation: "Robert Hooke is not known to have studied Indian scriptures, unlike the others."
+            },
+            {
+                id: 78,
+                section: "B",
+                lecture: 8,
+                type: "mcq",
+                question: "Around how many people studied at Takshashilā University for their post-graduation, at any one time?",
+                options: ["100", "1000", "10,000", "1,00,000"],
+                answer: 2,
+                explanation: "Around 10,000 students studied at Takshashila at any given time."
+            },
+            {
+                id: 79,
+                section: "B",
+                lecture: 8,
+                type: "mcq",
+                question: "Which Indian medical researcher developed the world's first organ regeneration technique?",
+                options: ["Balkrishna Matapurkar", "Ashima Anand", "Subrata Adak", "Srinivasa Ramanujan"],
+                answer: 0,
+                explanation: "Dr. Balkrishna Matapurkar developed the first organ regeneration technique."
+            },
+            {
+                id: 80,
+                section: "B",
+                lecture: 9,
+                type: "mcq",
+                question: "Which Professor told Kalam, \"This is not good enough Kalam, I expected much better from you.\"",
+                options: ["Prof. B.V. Buddhe", "Prof. Satish Dhawan", "Prof. Srinivasan", "Dr Brahma Prakash."],
+                answer: 1,
+                explanation: "Prof. Satish Dhawan challenged Kalam to do better."
+            },
+            {
+                id: 81,
+                section: "B",
+                lecture: 9,
+                type: "mcq",
+                question: "Which of the following was NOT achieved by Dr Abdul Kalam?",
+                options: ["Bharat Ratna Award", "Padma Shri Award", "The name: 'The People's President'", "48 Honorary Doctorates"],
+                answer: 1,
+                explanation: "Dr Kalam received Bharat Ratna and was called People's President, but the Padma Shri detail needs verification."
+            },
+            {
+                id: 82,
+                section: "B",
+                lecture: 10,
+                type: "mcq",
+                question: "What kind of person is NOT effective at networking?",
+                options: ["Someone who is good at listening", "Someone who is good at asking the right questions", "Someone who stays in touch only when they need something", "Someone who is sincere"],
+                answer: 2,
+                explanation: "People who only reach out when they need something are not effective networkers."
+            },
+            {
+                id: 83,
+                section: "B",
+                lecture: 10,
+                type: "mcq",
+                question: "As per the IPDC workbook, which of the following is NOT a leadership skill?",
+                options: ["Go the extra mile", "Become a Painter", "Keep a balance", "Become a MasterChef"],
+                answer: 1,
+                explanation: "Becoming a Painter is not listed as a leadership skill in the workbook."
+            },
+            {
+                id: 84,
+                section: "B",
+                lecture: 11,
+                type: "mcq",
+                question: "What was the ideal example of project management that was used as a case study in the lecture?",
+                options: ["The Taj Mahal", "The Burj Khalifa", "The Swaminarayan Akshardham", "The Pyramids of Egypt"],
+                answer: 2,
+                explanation: "Swaminarayan Akshardham was used as an example of excellent project management."
+            },
+            {
+                id: 85,
+                section: "B",
+                lecture: 11,
+                type: "mcq",
+                question: "Which of these is NOT one of the principles of the Project Management Triangle?",
+                options: ["Environmental Impact", "Quality of Project", "Time Efficiency", "Resources"],
+                answer: 0,
+                explanation: "Environmental Impact is not part of the Project Management Triangle (Time, Cost, Quality)."
+            },
+            {
+                id: 86,
+                section: "B",
+                lecture: 11,
+                type: "mcq",
+                question: "Management, in any field, brings forth which of the following?",
+                options: ["Optimal results with minimal effort", "Minimal results with optimal efforts.", "Hard work with no results", "No work with no results"],
+                answer: 0,
+                explanation: "Management aims to achieve optimal results with minimal effort."
+            },
+            {
+                id: 87,
+                section: "B",
+                lecture: 12,
+                type: "mcq",
+                question: "Which of the following is NOT mentioned as a flip-side (drawback) of Social Media in the IPDC workbook?",
+                options: ["FOMO", "Negative body image", "Healthy sleep patterns", "Poor concentration"],
+                answer: 2,
+                explanation: "Healthy sleep patterns are NOT a drawback; social media actually harms sleep patterns."
+            },
+            {
+                id: 88,
+                section: "B",
+                lecture: 12,
+                type: "mcq",
+                question: "As per Pramukh Swami Maharaj, is technology a blessing or a curse?",
+                options: ["Blessing", "Curse", "It is a blessing with its discreet usage and is a curse without", "It is a curse with its discreet usage and is a blessing without"],
+                answer: 2,
+                explanation: "Technology is a blessing when used discreetly, and a curse without discretion."
+            },
+            {
+                id: 89,
+                section: "B",
+                lecture: 12,
+                type: "mcq",
+                question: "Who told journalists that, his children have not used the iPad and he put a limit on how much technology his kids use at home?",
+                options: ["Mark Zuckerberg", "Steve Jobs", "Bill Gates", "Tim Cook"],
+                answer: 1,
+                explanation: "Steve Jobs limited his children's technology use."
+            },
+            {
+                id: 90,
+                section: "B",
+                lecture: 12,
+                type: "mcq",
+                question: "Which one of the following activities is harmful?",
+                options: ["Avoidance of phone usage in the middle of the night", "Spending more than 5 hours a day on the phone", "Prevention of the misuse of social media", "Turn your phone on airplane mode while studying"],
+                answer: 1,
+                explanation: "Spending more than 5 hours daily on phone is harmful."
+            },
+            {
+                id: 91,
+                section: "B",
+                lecture: 13,
+                type: "mcq",
+                question: "The IPDC lesson taught us to keep faith in three things. Which of the below was NOT one of them?",
+                options: ["Faith in ourselves", "Faith in the system", "Faith in others", "Faith in God"],
+                answer: 1,
+                explanation: "The three faiths are: in ourselves, in others, and in God - not in the system."
+            },
+            {
+                id: 92,
+                section: "B",
+                lecture: 13,
+                type: "mcq",
+                question: "Due to which one of the following reasons did Arunima Sinha lose her leg?",
+                options: ["A car ran over her leg", "A train crushed her leg", "Her leg got stuck in a factory machine", "She developed cancer in her leg"],
+                answer: 1,
+                explanation: "Arunima Sinha lost her leg when she was pushed from a train."
+            },
+            {
+                id: 93,
+                section: "B",
+                lecture: 13,
+                type: "mcq",
+                question: "Arunima Sinha received a call letter from which organisation?",
+                options: ["CAPF", "CISF", "CRPF", "CIA"],
+                answer: 2,
+                explanation: "Arunima Sinha received a call letter from CRPF (Central Reserve Police Force)."
+            },
+            {
+                id: 94,
+                section: "B",
+                lecture: 13,
+                type: "mcq",
+                question: "The human brain has approximately how many neurons?",
+                options: ["100 billion neurons", "200 billion neurons", "100 million neurons", "200 million neurons"],
+                answer: 0,
+                explanation: "The human brain has approximately 100 billion neurons."
+            },
+            {
+                id: 95,
+                section: "B",
+                lecture: 13,
+                type: "mcq",
+                question: "The human brain takes approximately how long to process the things we see?",
+                options: ["13 seconds", "13 nanoseconds", "13 milliseconds", "13 minutes"],
+                answer: 2,
+                explanation: "The brain processes visual information in about 13 milliseconds."
+            },
+            {
+                id: 96,
+                section: "B",
+                lecture: 14,
+                type: "mcq",
+                question: "Fill in the blanks with the correct words from the following quote: \" Having someone to love is __, having somewhere to go is , having both is __.\"",
+                options: ["family, home, a blessing", "lovely, friendly, comfort", "good, great, fantastic", "rare, lucky, a wish fulfilled"],
+                answer: 0,
+                explanation: "The quote is: Having someone to love is family, having somewhere to go is home, having both is a blessing."
+            },
+            {
+                id: 97,
+                section: "B",
+                lecture: 14,
+                type: "mcq",
+                question: "Complete the following phrase: \"Home is where the is\"",
+                options: ["mind", "heart", "life", "light"],
+                answer: 1,
+                explanation: "The phrase is \"Home is where the heart is.\""
+            },
+            {
+                id: 98,
+                section: "B",
+                lecture: 14,
+                type: "mcq",
+                question: "According to the IPDC workbook, family get-togethers should take place at least:",
+                options: ["Once every week", "Once every month", "Once every year", "Once every 2 years"],
+                answer: 1,
+                explanation: "Family get-togethers should happen at least once every month."
+            },
+            {
+                id: 99,
+                section: "B",
+                lecture: 15,
+                type: "mcq",
+                question: "What intention should we keep when performing seva?",
+                options: ["To help others", "To gain rewards", "To get money", "To be appreciated"],
+                answer: 0,
+                explanation: "Seva should be done with the intention to help others, not for personal gain."
+            },
+            {
+                id: 100,
+                section: "B",
+                lecture: 15,
+                type: "mcq",
+                question: "Which of the following methods should we NOT use when performing seva?",
+                options: ["Serve with love", "Be thankful", "Be prepared to sacrifice", "Serve to get praised"],
+                answer: 3,
+                explanation: "We should not perform seva to get praised; it should be selfless."
+            },
+
+            // SECTION C - Scenario Based (Q101-Q130)
+            {
+                id: 101,
+                section: "C",
+                lecture: 1,
+                type: "scenario",
+                question: "Manish is upset because all his classmates have brand-name clothes and the latest mobile phones. Whereas his family's difficult financial situation means that Manish has no choice but to accept whatever used accessories his elder brother gives him. What advice do you think is the best advice for Manish right now?",
+                options: ["Avoid focusing on what you do not have but learn to appreciate what you do have. This will bring positivity into your daily life.", "This is life, just accept it. But if you work hard now, then you will earn enough money to buy whatever you want in the future. Then you will always be happy."],
+                answer: 0,
+                explanation: "Gratitude for what we have brings positivity, while focusing on what we lack creates unhappiness."
+            },
+            {
+                id: 102,
+                section: "C",
+                lecture: 1,
+                type: "scenario",
+                question: "'First they break you and then they remake you'. What can we learn from this method that the USA Army use to train their recruits?",
+                options: ["We should be ready to come out of our own comfort zone to further our personal growth.", "We should break all limits and make new innovations."],
+                answer: 0,
+                explanation: "Personal growth often requires stepping out of our comfort zones."
+            },
+            {
+                id: 103,
+                section: "C",
+                lecture: 1,
+                type: "scenario",
+                question: "After being stuck in quarantine for 6 months, Manohar has not been able to take his usual journey to college. For the last 6 months, his usual routine consists of waking up at 11 AM, watching a movie, taking a nap, and then studying through the whole night while eating the fast food that he ordered online. Unfortunately, despite his hard efforts, he is finding it harder to concentrate while studying and he is feeling more tired than usual. Manohar explains his confusion to you, what do you think is the best way to advise him?",
+                options: ["Do not worry, you are genuinely trying your best. Once college opens again, everything will go back to normal and you will see the fruit of your hard effort.", "Do not worry, you are trying your best. But you should consider exercising and eating healthier. You know what they say, a healthy body makes a healthy mind."],
+                answer: 1,
+                explanation: "Physical health directly impacts mental performance and concentration."
+            },
+            {
+                id: 104,
+                section: "C",
+                lecture: 5,
+                type: "scenario",
+                question: "Two weeks ago, Abdul submitted his scientific research paper for his first review Due to the lack of support from his appointed research partner, Abdul had to rush the result analysis. Today, when he went to collect feedback, his Professor responded only with harsh criticism for his work. How do you think Abdul should handle the situation, going forward?",
+                options: ["He should ignore the Professor's harsh tone and keep trying amidst the difficult circumstances.", "He should try and use that criticism to improve his research paper"],
+                answer: 1,
+                explanation: "Constructive criticism, even if harsh, can help us improve."
+            },
+            {
+                id: 105,
+                section: "C",
+                lecture: 2,
+                type: "scenario",
+                question: "\"The rule of 21\" - What did we learn from this rule in the context of new habits, as mentioned by Robin Sharma in his book named - \"Who will cry when you die?\"",
+                options: ["You should develop a habit, by practising it for 21 days without a break. Initially, it is normal to feel uncomfortable for the first few days. But if you break them in for about three weeks, they will fit like a second skin.", "If you find it uncomfortable while developing a new habit then take a break and continue when it feels more natural to you. Continue this until you reach the 21 days target to develop a beneficial habit."],
+                answer: 0,
+                explanation: "Consistency for 21 days helps form lasting habits, even when uncomfortable initially."
+            },
+            {
+                id: 106,
+                section: "C",
+                lecture: 2,
+                type: "scenario",
+                question: "Radha wants to start a new habit of running 10km daily. She downloaded a fitness app and even bought new trainers. But she struggles to stay motivated to continue every day, especially when her legs feel a bit sore. What can she do to make this habit more regular in her daily routine?",
+                options: ["Run an extra 5km on the next day as a punishment for skipping a day.", "Allow herself a small reward every time she reaches her target."],
+                answer: 1,
+                explanation: "Positive reinforcement through rewards helps maintain motivation for habits."
+            },
+            {
+                id: 107,
+                section: "C",
+                lecture: 2,
+                type: "scenario",
+                question: "Sanjay spends time on social media until late at night. Because of this, he is sometimes unable to wake up on time in the morning. On such occasions, he sometimes skips his scheduled workout session, so that he can catch the bus to work, to arrive on time. What do you think Sanjay should do to become more consistent?",
+                options: ["He needs to break the habit of staying up late so that he can wake up on time and complete his morning workout as planned.", "Social media is also an important part of his nightly routine. So, he should buy a personal vehicle and use that to reduce travel time. That way he can exercise and reach his office on time"],
+                answer: 0,
+                explanation: "Addressing the root cause (late night social media) is better than workarounds."
+            },
+            {
+                id: 108,
+                section: "C",
+                lecture: 3,
+                type: "scenario",
+                question: "Dhaval has been visiting the cricket nets every day to practice for the upcoming regional trials in a few days. He feels confident in his ability and expects to gain a spot in the regional cricket team. Upon his regular visits, he gets familiar with another youth called Raj. Upon talking, Dhaval finds out that Raj is also applying for the trials. Raj requests Dhaval to give him some guidance on his batting style. Raj is not sure whether to help him or not, because competition is already high and Dhaval seems naturally talented. What do you think Raj should do?",
+                options: ["Dhaval should try his hardest to assist Raj to improve his batting technique.", "Dhaval should give Raj a few general tips before leaving to focus on his own technique."],
+                answer: 0,
+                explanation: "Helping others reflects a legendary mindset and doesn't diminish our own success."
+            },
+            {
+                id: 109,
+                section: "C",
+                lecture: 3,
+                type: "scenario",
+                question: "Mr Honda is the CEO of a clothing manufacturing company. Over the last two years, Mr Honda has successfully opened 18 new factories around India. Today, he has a review meeting with his clients in Mumbai. Just as he was about to board his flight, he receives news of an accident in one of his nearby factories. One of the machines temporary malfunctioned, injuring 15-20 of his workers. What should Mr Honda do?",
+                options: ["Mr Honda should reschedule his meeting and visit the factory to personally provide emotional and financial support to his workers according to their needs.", "Mr Honda should inform the manager to give the workers a financial package for their troubles and then continue to his meeting."],
+                answer: 0,
+                explanation: "Leaders prioritize their people's wellbeing over business meetings."
+            },
+            {
+                id: 110,
+                section: "C",
+                lecture: 3,
+                type: "scenario",
+                question: "Ram has just received his mid-term exam back from his teacher. He has scored the highest score in the class with an amazing 91%. After being praised by his teacher, Ram looks through his classmate's paper. His classmate, Shyam, has also scored very highly. Upon further inspection, Ram notices that one of Shyam's questions was marked incorrectly. If Ram informs the teacher then Shyam will gain 3 more marks. However, this will put Shyam as the highest scorer and Ram as second. What do you think Ram should do?",
+                options: ["Ram should not inform the teacher. The fault belongs to the teacher. So, Ram should just enjoy his well-earned first place.", "Ram should inform the teacher about the mistake and take pleasure in helping Shyam get a better grade."],
+                answer: 1,
+                explanation: "Integrity and helping others are more important than personal glory."
+            },
+            {
+                id: 111,
+                section: "C",
+                lecture: 4,
+                type: "scenario",
+                question: "Suraj is having a discussion with his friend Minesh about a recent argument they had at college. This incident has made Minesh feel disappointed. He believes that Suraj is to blame for the whole incident. But Suraj tries to calmly explain why he reacted in the way he did. What is the best way for Minesh to approach this conversation?",
+                options: ["Minesh should get up and leave the conversation. Then try to forget about the incident.", "Minesh should carefully listen and try to understand Suraj's perspective with an open mindset."],
+                answer: 1,
+                explanation: "Active listening with an open mind helps resolve conflicts."
+            },
+            {
+                id: 112,
+                section: "C",
+                lecture: 4,
+                type: "scenario",
+                question: "Shilpa has had a difficult day at school and wants to talk to her cousin, Kinjal, about it. They have sat down in the sitting room and Kinjal is listening to Shilpa. During the conversation. Kinjal sees that her friend, Meena, is calling her phone, probably to discuss next week's shopping trip. What should Kinjal do now?",
+                options: ["Kinjal should tell Shilpa to wait so she can answer her phone and talk to Meena. Shilpa is going to be at the house for the whole day so they can talk after the phone call.", "Kinjal should ask Meena to call her later during the day and then give Shilpa her full attention."],
+                answer: 1,
+                explanation: "Giving full attention to someone who needs support is more important than casual calls."
+            },
+            {
+                id: 113,
+                section: "C",
+                lecture: 5,
+                type: "scenario",
+                question: "Mac coaches his local soccer team. During the regional tournament, his team loses 3 matches in a row. What do you think Max should do to help his team?",
+                options: ["Mac will explain to his team, \" Those 3 teams were the toughest in the region. So, it was surely going to be a challenge to play them. But in the next game, it will be easy for us to win. So do not worry about our losses.\"", "Mac will review the mistakes that his team members made while playing. He will have both one-to-one and group meetings with his team members, to convey the tactics they need to use to improve."],
+                answer: 1,
+                explanation: "Learning from mistakes and improving is better than making excuses."
+            },
+            {
+                id: 114,
+                section: "C",
+                lecture: 5,
+                type: "scenario",
+                question: "Anjali has prepared for a cultural festival dance performance at her college. She has been practising for many weeks. It is now the day before the event and Anjali is feeling quite confident. But that was until she saw the other participants practising. Seeing their dance routines, she felt that they were far more superior than her. What would you recommend her to do?",
+                options: ["She should remember her efforts and give her best performance possible.", "She should give an excuse to the organiser and avoid her performance to prevent any potential embarrassment."],
+                answer: 0,
+                explanation: "Focus on your own efforts and do your best regardless of others."
+            },
+            {
+                id: 115,
+                section: "C",
+                lecture: 6,
+                type: "scenario",
+                question: "As a result of his good exam performance, Kirtan recently gained admission to a prestigious college. But upon exploring the college environment, he sees that most of the students are intelligent, wealthy and speak fluent English. Kirtan, coming from a lesser advantaged background, feels that he does not belong in this environment. What do you think Kirtan should do?",
+                options: ["Kirtan should remember that he has earned the right to admission through his academic ability. He should focus on working hard and not on his background.", "Kirtan needs to be more like the other students. If he starts wearing fancy clothes and copies the speaking style of the other students, then he will feel more comfortable."],
+                answer: 0,
+                explanation: "Focus on your own achievements and hard work, not on comparing with others."
+            },
+            {
+                id: 116,
+                section: "C",
+                lecture: 6,
+                type: "scenario",
+                question: "Deepa is currently studying law at a world-renowned college in America. She has been asked to deliver a speech about gender equality at a regional student convention. Deepa is passionate about her subject, but she is worried that the audience members will quietly mock her Indian accent and origin. She is mostly prepared for her speech, but with 3 days to go, this worry is still playing in her mind. What should she do?",
+                options: ["Deepa should use these last few days to try and adopt a more American accent.", "Deepa should focus on channelling her passion to her audience."],
+                answer: 1,
+                explanation: "Passion and content matter more than accent; authenticity is powerful."
+            },
+            {
+                id: 117,
+                section: "C",
+                lecture: 8,
+                type: "scenario",
+                question: "Riya has been invited to this year's National Youth Summit. As a medical student, she has been asked to prepare her view on the future of India and its medical practitioners. She is trying to decide which message she should convey. What do you think is the best option:",
+                options: ["Youths should contribute to India by becoming doctors. Being a doctor means you can become wealthy and reputable.", "Youths should contribute to India by becoming doctors. Being a doctor means you can serve your country by helping its citizens."],
+                answer: 1,
+                explanation: "Service to the nation should be the motivation, not wealth or reputation."
+            },
+            {
+                id: 118,
+                section: "C",
+                lecture: 9,
+                type: "scenario",
+                question: "Jenish works as a computer engineer for an upcoming technology company. His manager has set him the task to update an important function for a developing product. From the requirements given by the manager, Jenish predicts that it will take him at least 10 days to finish it. But his manager has challenged him to complete it in 4 days. How should Jenish react to such a request?",
+                options: ["Jenish should tell the manager that 4 days is impossible, but he will deliver it in 10 days.", "Jenish should meet his manager's challenge and try his hardest to try and complete it in 4 days."],
+                answer: 1,
+                explanation: "Embracing challenges and pushing limits leads to growth, like Dr. Kalam's example."
+            },
+            {
+                id: 119,
+                section: "C",
+                lecture: 9,
+                type: "scenario",
+                question: "Bhavya has just completed her master's degree in Biophysics. She is now applying to take a PhD at five of the top 20 universities in America. She has received admission to two universities and is now deciding which admission to accept. After weighing up both options, she has seen two deciding factors. Which of the below factors do you think she should prioritize as the most important?",
+                options: ["The expertise and suitability of the PhD supervisor.", "The reputation and prestige of the university."],
+                answer: 0,
+                explanation: "The supervisor's expertise and guidance matter more than university prestige for PhD success."
+            },
+            {
+                id: 120,
+                section: "C",
+                lecture: 10,
+                type: "scenario",
+                question: "As a student, you want to excel not just in your academics but your personal life too, should you….",
+                options: ["Seek to build a strong network with your teachers and classmates.", "Seek to build a strong network with classmates only, as teachers do not work in the industry, meaning that their knowledge is theoretically limited."],
+                answer: 0,
+                explanation: "Building relationships with both teachers and classmates provides diverse perspectives and opportunities."
+            },
+            {
+                id: 121,
+                section: "C",
+                lecture: 10,
+                type: "scenario",
+                question: "Ravi has recently developed a new start-up company providing an online delivery service. His company has been gaining many orders from his customers. His six employees have been working non-stop for the last 18 hours to meet the increased demands. As he is about to leave the office, he sees it is 10 PM, and his employees must still package 300 more products before they can rest tonight. As their leader, how should Ravi engage with his employees?",
+                options: ["Ravi should take out a few minutes to order his employees to work harder and faster.", "Ravi should stay with his employees to help them finish packaging the products."],
+                answer: 1,
+                explanation: "Leading by example and working alongside the team builds respect and motivation."
+            },
+            {
+                id: 122,
+                section: "C",
+                lecture: 11,
+                type: "scenario",
+                question: "You have planned a cultural event at your college. You have planned to set a wonderful stage for the inauguration. Your institute has allocated a dedicated fund for the stage decoration. During the final selection, you find that your team will need more human resources to set the stage, in addition to the current labourers. What will you do?",
+                options: ["Train students for stage building and decoration", "Request your institute to increase the allocated budget to hire more labourers"],
+                answer: 0,
+                explanation: "Training students is a sustainable solution that also builds skills."
+            },
+            {
+                id: 123,
+                section: "C",
+                lecture: 11,
+                type: "scenario",
+                question: "You have organised an online quiz. Students across your state have registered for this quiz in huge numbers. You and the participants are excited to take part. But just before the quiz, the server crashes due to a technical fault. What would you do?",
+                options: ["You will immediately report this error to the principal and ask a technical person to provide a solution. Till then you will postpone the quiz.", "You will cancel the quiz because you doubt the capacity of the server. In the future, you will conduct the quiz with limited capacity."],
+                answer: 0,
+                explanation: "Seeking technical solutions and communicating transparently is better than canceling."
+            },
+            {
+                id: 124,
+                section: "C",
+                lecture: 12,
+                type: "scenario",
+                question: "Satya is currently studying at 9th standard. His schoolwork has moved online and he now studies at home all the time. He spends hours on his phone every day to keep himself entertained and to escape his boredom. He feels bad about it. What advice would you give him?",
+                options: ["It is a tough time right now, spending more time on social media will allow you to pass time quicker. Search for posts that are positive and useful.", "It is a tough time right now, so it is important to make sure we do not slip into harmful habits and lose control of our attention. So, limit the time in which you use social media."],
+                answer: 1,
+                explanation: "Setting limits on social media prevents harmful habits and maintains control."
+            },
+            {
+                id: 125,
+                section: "C",
+                lecture: 12,
+                type: "scenario",
+                question: "Chandresh has been using his phone at night before bedtime and now experiences sleeplessness. How would you suggest he solves this problem?",
+                options: ["He should only use limited applications at night and avoid playing any games on his phone.", "He should set a fixed time at night where he stops using social media. And he should not sleep with his phone within reach."],
+                answer: 1,
+                explanation: "Setting boundaries and keeping phone away improves sleep quality."
+            },
+            {
+                id: 126,
+                section: "C",
+                lecture: 12,
+                type: "scenario",
+                question: "Chris Anderson (Chief Executive of 3D Robotics) once stated that \"We have seen the dangers of technology first-hand. I've seen it in myself, I don't want to see that happen to my kids.\" Which statement best describes the important lesson to be learnt from this quote?",
+                options: ["Children under the age of 12 should be banned from using social media.", "The use of technology can be harmful, especially for youths. It should be limited and used cautiously."],
+                answer: 1,
+                explanation: "Technology requires mindful, limited use, especially for young people."
+            },
+            {
+                id: 127,
+                section: "C",
+                lecture: 14,
+                type: "scenario",
+                question: "Anuj has an aspiration of becoming a credible IT consultant. He spends most of the time on his laptop and mobile to watch online certification training videos, track market trends, and to expand his professional network. However, this prevents him from spending much time with his family even though they live in the same household. His parents often complain about him being 'always stuck to his laptop and mobile'. How should Anuj evaluate his routine?",
+                options: ["Anuj should keep his career as his prime focus. He should promise his parents that he will schedule them in some quality time for one weekend, next month. After his career is set, then he will make more time to spend with his family.", "Anuj should schedule some quality time for his parents every week. He can continue working on his career, but it will not hurt him to take a break from his electronics now and again."],
+                answer: 1,
+                explanation: "Balancing career and family time is important; consistent small efforts matter."
+            },
+            {
+                id: 128,
+                section: "C",
+                lecture: 14,
+                type: "scenario",
+                question: "Megha has recently been feeling unhappy and lonely. For the last 2 weeks, she has been longing to share her emotions with someone. What should she do?",
+                options: ["She should reach out to people using social media and create new friendships.", "She should express her feelings to family members with who she feels comfortable."],
+                answer: 1,
+                explanation: "Sharing with trusted family members provides genuine emotional support."
+            },
+            {
+                id: 129,
+                section: "C",
+                lecture: 15,
+                type: "scenario",
+                question: "Mira and Bira are both medical students who have decided to volunteer for the college blood drive. They were both scheduled to spend one-hour taking blood from the donors, before leaving for their summer vacation. But the organiser has requested them to stay two hours longer to help deal with the unexpected increase of donors. Mira and Bira both have different responses, which one from the following do you think is more appropriate?",
+                options: ["Mira agrees to continue her seva as long as necessary.", "Bira decides to leave as she has completed the time that was originally agreed."],
+                answer: 0,
+                explanation: "True seva involves flexibility and commitment to helping others."
+            },
+            {
+                id: 130,
+                section: "C",
+                lecture: 15,
+                type: "scenario",
+                question: "Nehal spent her school vacation volunteering for a disaster relief project. This required her to spend two weeks packing and distributing food packets for flood victims. This seva was tiring and time-consuming. Despite her efforts she found the residents of one village to be very ungrateful. The residents took the food packets, but they did not say thanks, smile, or give any response. This made Nehal feel sad and unappreciated. What advice best suits Nehal's difficulty during this seva?",
+                options: ["We should not expect everyone to be thankful. Instead, we should be thankful that we have been given the opportunity to perform this important seva.", "Only a few residents were ungrateful. But some people from the other villages praised us, so we should remember those praises instead."],
+                answer: 0,
+                explanation: "Seva should be done without expectation of gratitude; the opportunity to serve is itself a blessing."
+            }
+        ];
+
+        // App State
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let currentMode = '';
+
+        // Initialize
+        function init() {
+            loadProgress();
+            populateLectureOptions();
+        }
+
+        // Screen Management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goHome() {
+            showScreen('home-screen');
+        }
+
+        // Start Quiz Functions
+        function startFullTest() {
+            currentQuestions = [...questions];
+            currentMode = 'full';
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        function startSection(section) {
+            currentQuestions = questions.filter(q => q.section === section);
+            currentMode = 'section-' + section;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        function startLecture(lectureNum) {
+            currentQuestions = questions.filter(q => q.lecture === lectureNum);
+            currentMode = 'lecture-' + lectureNum;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            closeModal('lecture-modal');
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        function startRandom(count) {
+            const shuffled = [...questions].sort(() => Math.random() - 0.5);
+            currentQuestions = shuffled.slice(0, count);
+            currentMode = 'random-' + count;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            closeModal('random-modal');
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        // Modal Functions
+        function showLectureModal() {
+            document.getElementById('lecture-modal').classList.add('active');
+        }
+
+        function showRandomModal() {
+            document.getElementById('random-modal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function populateLectureOptions() {
+            const container = document.getElementById('lecture-options');
+            for (let i = 1; i <= 15; i++) {
+                const div = document.createElement('div');
+                div.className = 'modal-option';
+                div.textContent = `Lecture ${i}`;
+                div.onclick = () => startLecture(i);
+                container.appendChild(div);
+            }
+        }
+
+        // Question Display
+        function loadQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            
+            document.getElementById('lecture-badge').textContent = `Lecture ${question.lecture}`;
+            document.getElementById('question-counter').textContent = 
+                `Question ${currentQuestionIndex + 1} / ${currentQuestions.length}`;
+            document.getElementById('progress-fill').style.width = 
+                `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
+            document.getElementById('question-text').textContent = question.question;
+
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(index);
+                optionsGrid.appendChild(btn);
+            });
+
+            // Reset UI
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('check-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+
+            // If already answered, show answer
+            if (userAnswers[question.id] !== undefined) {
+                showExistingAnswer(question);
+            }
+        }
+
+        function showExistingAnswer(question) {
+            const userAnswer = userAnswers[question.id];
+            const options = document.querySelectorAll('.option-btn');
+            
+            options.forEach((btn, index) => {
+                btn.onclick = null;
+                if (index === question.answer) {
+                    btn.classList.add('correct');
+                }
+                if (index === userAnswer && userAnswer !== question.answer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            showFeedback(question, userAnswer);
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        let selectedOption = null;
+
+        function selectOption(index) {
+            selectedOption = index;
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach((btn, i) => {
+                btn.classList.remove('selected');
+                if (i === index) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function checkAnswer() {
+            if (selectedOption === null) {
+                alert('Please select an answer');
+                return;
+            }
+
+            const question = currentQuestions[currentQuestionIndex];
+            userAnswers[question.id] = selectedOption;
+            saveProgress();
+
+            const options = document.querySelectorAll('.option-btn');
+            options.forEach((btn, index) => {
+                btn.onclick = null;
+                if (index === question.answer) {
+                    btn.classList.add('correct');
+                }
+                if (index === selectedOption && selectedOption !== question.answer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            showFeedback(question, selectedOption);
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            selectedOption = null;
+        }
+
+        function showFeedback(question, userAnswer) {
+            const feedback = document.getElementById('feedback');
+            const header = document.getElementById('feedback-header');
+            const details = document.getElementById('feedback-details');
+            const explanation = document.getElementById('explanation');
+
+            const isCorrect = userAnswer === question.answer;
+
+            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.style.display = 'block';
+
+            header.textContent = isCorrect ? '✓ Correct!' : '✕ Incorrect';
+
+            details.innerHTML = `
+                <p><strong>Your Answer:</strong> ${question.options[userAnswer]}</p>
+                <p><strong>Correct Answer:</strong> ${question.options[question.answer]}</p>
+            `;
+
+            explanation.innerHTML = `
+                <h4>Why?</h4>
+                <p>${question.explanation}</p>
+            `;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Results
+        function showResults() {
+            let correct = 0;
+            let wrong = 0;
+            let unanswered = 0;
+            let sectionA = { correct: 0, total: 0 };
+            let sectionB = { correct: 0, total: 0 };
+            let sectionC = { correct: 0, total: 0 };
+
+            currentQuestions.forEach(q => {
+                const answer = userAnswers[q.id];
+                if (answer === undefined) {
+                    unanswered++;
+                } else if (answer === q.answer) {
+                    correct++;
+                    if (q.section === 'A') sectionA.correct++;
+                    if (q.section === 'B') sectionB.correct++;
+                    if (q.section === 'C') sectionC.correct++;
+                } else {
+                    wrong++;
+                }
+
+                if (q.section === 'A') sectionA.total++;
+                if (q.section === 'B') sectionB.total++;
+                if (q.section === 'C') sectionC.total++;
+            });
+
+            const percentage = currentQuestions.length > 0 ? 
+                Math.round((correct / currentQuestions.length) * 100) : 0;
+
+            document.getElementById('final-score').textContent = percentage + '%';
+            document.getElementById('score-breakdown').textContent = 
+                `${correct} Correct • ${wrong} Wrong • ${unanswered} Unanswered`;
+            document.getElementById('correct-count').textContent = correct;
+            document.getElementById('wrong-count').textContent = wrong;
+            document.getElementById('unanswered-count').textContent = unanswered;
+            document.getElementById('section-a-score').textContent = 
+                `${sectionA.correct}/${sectionA.total}`;
+            document.getElementById('section-b-score').textContent = 
+                `${sectionB.correct}/${sectionB.total}`;
+            document.getElementById('section-c-score').textContent = 
+                `${sectionC.correct}/${sectionC.total}`;
+
+            showScreen('results-screen');
+        }
+
+        // Review
+        function showReview() {
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            if (Object.keys(userAnswers).length === 0) {
+                reviewList.innerHTML = '<p style="text-align: center; color: white;">No answers to review yet.</p>';
+                showScreen('review-screen');
+                return;
+            }
+
+            currentQuestions.forEach(q => {
+                const answer = userAnswers[q.id];
+                if (answer === undefined) return;
+
+                const isCorrect = answer === q.answer;
+                const item = document.createElement('div');
+                item.className = 'review-item ' + (isCorrect ? 'correct' : 'incorrect');
+                item.innerHTML = `
+                    <div class="review-item-header">
+                        <span class="review-item-number">Q${q.id}</span>
+                        <span class="review-item-status">${isCorrect ? 'Correct' : 'Incorrect'}</span>
+                    </div>
+                    <p class="review-item-question">${q.question}</p>
+                    <p class="review-item-answers">
+                        Your answer: ${q.options[answer]}<br>
+                        Correct answer: ${q.options[q.answer]}
+                    </p>
+                `;
+                reviewList.appendChild(item);
+            });
+
+            showScreen('review-screen');
+        }
+
+        function retryIncorrect() {
+            const incorrectQuestions = currentQuestions.filter(q => {
+                const answer = userAnswers[q.id];
+                return answer !== undefined && answer !== q.answer;
+            });
+
+            if (incorrectQuestions.length === 0) {
+                alert('No incorrect answers to retry!');
+                return;
+            }
+
+            currentQuestions = incorrectQuestions;
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        // Local Storage
+        function saveProgress() {
+            const data = {
+                mode: currentMode,
+                questions: currentQuestions.map(q => q.id),
+                answers: userAnswers,
+                index: currentQuestionIndex
+            };
+            localStorage.setItem('ipdc_progress', JSON.stringify(data));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('ipdc_progress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.answers && Object.keys(data.answers).length > 0) {
+                    // Show continue option
+                    const homeScreen = document.getElementById('home-screen');
+                    const continueBtn = document.createElement('button');
+                    continueBtn.className = 'btn btn-primary';
+                    continueBtn.textContent = 'Continue Previous Test';
+                    continueBtn.style.marginTop = '20px';
+                    continueBtn.onclick = () => continueTest(data);
+                    homeScreen.querySelector('.button-grid').appendChild(continueBtn);
+                }
+            }
+        }
+
+        function continueTest(data) {
+            currentQuestions = questions.filter(q => data.questions.includes(q.id));
+            userAnswers = data.answers;
+            currentQuestionIndex = data.index;
+            currentMode = data.mode;
+            showScreen('question-screen');
+            loadQuestion();
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress?')) {
+                localStorage.removeItem('ipdc_progress');
+                location.reload();
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
